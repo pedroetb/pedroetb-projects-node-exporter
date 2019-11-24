@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  node-exporter:
+    image: ${IMAGE_NAME:-prom/node-exporter}:${IMAGE_TAG:-latest}
+    user: root
+    entrypoint: ${CONFIG_PATH}/entrypoint.sh
+    command:
+      - --path.rootfs=${HOST_PATH}
+      - --path.sysfs=${HOST_PATH}/sys
+      - --path.procfs=${HOST_PATH}/proc
+      - --collector.textfile.directory=${CONFIG_PATH}
+      - --collector.filesystem.ignored-mount-points=^/(.+)($$|/)
+      - --no-collector.ipvs
+    environment:
+      CONFIG_PATH:
+      NODE_ID: '{{.Node.ID}}'
+    networks:
+      metric-net:
+    volumes:
+      - /:${HOST_PATH}:ro
+      - /etc/hostname:${CONFIG_PATH}/nodename:ro
+    configs:
+      - source: entrypoint-config
+        target: ${CONFIG_PATH}/entrypoint.sh
+        mode: 0555
+    deploy:
+      mode: global
+      restart_policy:
+        delay: ${RESTART_DELAY:-10s}
+      update_config:
+        delay: ${UPDATE_DELAY:-1m}
+      resources:
+        limits:
+          cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-32M}
+        reservations:
+          cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
+
+networks:
+  metric-net:
+    name: ${METRIC_NET_NAME:-metric-net}
+    external: true
+
+configs:
+  entrypoint-config:
+    name: ${ENTRYPOINT_CONFIG_NAME:-node-exporter-entrypoint}
+    file: ./config/entrypoint.sh
