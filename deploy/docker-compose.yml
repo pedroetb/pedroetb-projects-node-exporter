@@ -14,8 +14,8 @@ services:
       - --no-collector.ipvs
     environment:
       CONFIG_PATH:
-      NODE_ID: {{.Node.ID}}
-      NODE_NAME: {{.Node.Hostname}}
+      NODE_ID: '{{.Node.ID}}'
+      NODE_NAME: '{{.Node.Hostname}}'
     networks:
       metric-net:
     volumes:
