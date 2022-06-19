@@ -3,6 +3,7 @@ version: '3.9'
 services:
   node-exporter:
     image: ${IMAGE_NAME:-prom/node-exporter}:${IMAGE_TAG:-latest}
+    user: root
     entrypoint: ${CONFIG_PATH}/entrypoint.sh
     command:
       - --path.rootfs=${HOST_PATH}
