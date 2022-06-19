@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 services:
   node-exporter:
@@ -10,16 +10,16 @@ services:
       - --path.sysfs=${HOST_PATH}/sys
       - --path.procfs=${HOST_PATH}/proc
       - --collector.textfile.directory=${CONFIG_PATH}
-      - --collector.filesystem.ignored-mount-points=^/(.+)($$|/)
+      - --collector.filesystem.mount-points-exclude=^/(${MOUNT_POINTS_EXCLUDE})($$|/)
       - --no-collector.ipvs
     environment:
       CONFIG_PATH:
-      NODE_ID: '{{.Node.ID}}'
+      NODE_ID: {{.Node.ID}}
+      NODE_NAME: {{.Node.Hostname}}
     networks:
       metric-net:
     volumes:
-      - /:${HOST_PATH}:ro
-      - /etc/hostname:${CONFIG_PATH}/nodename:ro
+      - /:${HOST_PATH}:ro,rslave
     configs:
       - source: entrypoint-config
         target: ${CONFIG_PATH}/entrypoint.sh
@@ -27,16 +27,16 @@ services:
     deploy:
       mode: global
       restart_policy:
-        delay: ${RESTART_DELAY:-10s}
+        delay: ${RESTART_DELAY:-5s}
       update_config:
         delay: ${UPDATE_DELAY:-1m}
       resources:
         limits:
           cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
-          memory: ${RESOURCES_LIMITS_MEMORY:-32M}
+          memory: ${RESOURCES_LIMITS_MEMORY:-64M}
         reservations:
           cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
-          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-32M}
 
 networks:
   metric-net:
