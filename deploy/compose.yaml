@@ -31,10 +31,10 @@ services:
       resources:
         limits:
           cpus: '${RESOURCES_LIMITS_CPUS:-0.5}'
-          memory: ${RESOURCES_LIMITS_MEMORY:-64M}
+          memory: ${RESOURCES_LIMITS_MEMORY:-32M}
         reservations:
           cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
-          memory: ${RESOURCES_RESERVATIONS_MEMORY:-32M}
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
 
 networks:
   metric-net:
