@@ -1,9 +1,10 @@
 services:
   node-exporter:
     image: ${IMAGE_NAME:-prom/node-exporter}:${IMAGE_TAG:-latest}
-    user: root
     entrypoint: ${CONFIG_PATH}/entrypoint.sh
     command:
+      - --web.listen-address=:${PORT}
+      - --log.level=${LOG_LEVEL:-info}
       - --path.rootfs=${HOST_PATH}
       - --path.sysfs=${HOST_PATH}/sys
       - --path.procfs=${HOST_PATH}/proc
@@ -22,6 +23,12 @@ services:
       - source: entrypoint-config
         target: ${CONFIG_PATH}/entrypoint.sh
         mode: 0555
+    healthcheck:
+      test: wget --spider -q http://127.0.0.1:${PORT}
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-10}
+      start_period: ${HEALTHCHECK_START_PERIOD:-1m}
     deploy:
       mode: global
       restart_policy:
